@@ -55,7 +55,7 @@ steps:
       - id: docker_authentication
 
   download_goldstandard:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/dockstore-tool-synapse/v0.2/cwl/synapse-get-tool.cwl
+    run: https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/dockstore-tool-synapseclient/v0.2/cwl/synapse-get-tool.cwl
     in:
       - id: synapseid
         # Replace value here
