@@ -44,7 +44,11 @@ requirements:
           args = parser.parse_args()
           score = 3
           prediction_file_status = "SCORED"
-          result = {'score': score, 'submission_status': prediction_file_status}
+          result = {'primary_metric': 'auc',
+                    'primary_metric_value': 0.8
+                    'secondary_metric': 'aupr',  # Optional
+                    'secondary_metric_value: 0.2,  # Optional
+                    'submission_status': prediction_file_status}
           with open(args.results, 'w') as o:
             o.write(json.dumps(result))
      
@@ -53,3 +57,24 @@ outputs:
     type: File
     outputBinding:
       glob: results.json
+
+  - id: primary_metric
+    type: string
+    outputBinding:
+      glob: results.json
+      loadContents: true
+      outputEval: $(JSON.parse(self[0].contents)['primary_metric'])
+
+  - id: primary_metric_value
+    type: string
+    outputBinding:
+      glob: results.json
+      loadContents: true
+      outputEval: $(JSON.parse(self[0].contents)['primary_metric_value'])
+
+  - id: status
+    type: string
+    outputBinding:
+      glob: results.json
+      loadContents: true
+      outputEval: $(JSON.parse(self[0].contents)['submission_status'])
