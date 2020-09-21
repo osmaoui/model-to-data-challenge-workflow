@@ -46,7 +46,7 @@ requirements:
           prediction_file_status = "SCORED"
           # secondary_metric and secondary_metric_value are optional
           result = {'primary_metric': 'auc',
-                    'primary_metric_value': 0.8
+                    'primary_metric_value': 0.8,
                     'secondary_metric': 'aupr',
                     'secondary_metric_value: 0.2,
                     'submission_status': prediction_file_status}
