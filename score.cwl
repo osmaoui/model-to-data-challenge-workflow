@@ -67,11 +67,25 @@ outputs:
       outputEval: $(JSON.parse(self[0].contents)['primary_metric'])
 
   - id: primary_metric_value
-    type: string
+    type: double
     outputBinding:
       glob: results.json
       loadContents: true
       outputEval: $(JSON.parse(self[0].contents)['primary_metric_value'])
+
+  - id: secondary_metric
+    type: string?
+    outputBinding:
+      glob: results.json
+      loadContents: true
+      outputEval: $(JSON.parse(self[0].contents)['secondary_metric'])
+
+  - id: secondary_metric_value
+    type: double?
+    outputBinding:
+      glob: results.json
+      loadContents: true
+      outputEval: $(JSON.parse(self[0].contents)['secondary_metric_value'])
 
   - id: status
     type: string
