@@ -85,7 +85,18 @@ def main(syn, args):
     if args.status == "INVALID":
         raise Exception("Docker image is invalid")
 
-    client = docker.from_env()
+    # The new toil version doesn't seem to pull the docker config file from
+    # .docker/config.json...
+    # client = docker.from_env()
+    client = docker.DockerClient(base_url='unix://var/run/docker.sock')
+    config = synapseclient.Synapse().getConfigFile(
+        configPath=args.synapse_config
+    )
+    authen = dict(config.items("authentication"))
+    client.login(username=authen['username'],
+                 password=authen['password'],
+                 registry="https://docker.synapse.org")
+                 # dockercfg_path=".docker/config.json")
 
     print(getpass.getuser())
 
@@ -180,25 +191,6 @@ def main(syn, args):
     # tar(output_dir, 'outputs.tar.gz')
 
 
-def quitting(signo, _frame, submissionid=None, docker_image=None,
-             parentid=None, syn=None):
-    """When quit signal, stop docker container and delete image"""
-    print("Interrupted by %d, shutting down" % signo)
-    # Make sure to store logs and remove containers
-    try:
-        cont = client.containers.get(submissionid)
-        log_text = cont.logs()
-        log_filename = submissionid + "_training_log.txt"
-        create_log_file(log_filename, log_text=log_text)
-        store_log_file(syn, log_filename, args.parentid)
-        cont.stop()
-        cont.remove()
-    except Exception:
-        pass
-    remove_docker_image(docker_image)
-    sys.exit(0)
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--submissionid", required=True,
@@ -215,16 +207,6 @@ if __name__ == '__main__':
                         help="Parent Id of submitter directory")
     parser.add_argument("--status", required=True, help="Docker image status")
     args = parser.parse_args()
-    client = docker.from_env()
     syn = synapseclient.Synapse(configPath=args.synapse_config)
     syn.login()
-
-    docker_image = args.docker_repository + "@" + args.docker_digest
-
-    quit_sub = partial(quitting, submissionid=args.submissionid,
-                       docker_image=docker_image, parentid=args.parentid,
-                       syn=syn)
-    for sig in ('TERM', 'HUP', 'INT'):
-        signal.signal(getattr(signal, 'SIG'+sig), quit_sub)
-
     main(syn, args)
