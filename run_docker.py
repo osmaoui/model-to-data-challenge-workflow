@@ -1,12 +1,9 @@
 """Run training synthetic docker models"""
 from __future__ import print_function
 import argparse
-from functools import partial
 import getpass
 import os
-import signal
-import subprocess
-import sys
+import tarfile
 import time
 
 import docker
@@ -58,15 +55,15 @@ def remove_docker_image(image_name):
 
 
 def tar(directory, tar_filename):
-    """Tar all files in a directory and remove the files
+    """Tar all files in a directory
 
     Args:
         directory: Directory path to files to tar
         tar_filename:  tar file path
     """
-    tar_command = ['tar', '-C', directory, '--remove-files', '.', '-cvzf',
-                   tar_filename]
-    subprocess.check_call(tar_command)
+    with tarfile.open(tar_filename, "w") as tar_o:
+        tar_o.add(directory)
+    # TODO: Potentially add code to remove all files that were zipped.
 
 
 def untar(directory, tar_filename):
@@ -76,8 +73,8 @@ def untar(directory, tar_filename):
         directory: Path to directory to untar files
         tar_filename:  tar file path
     """
-    untar_command = ['tar', '-C', directory, '-xvf', tar_filename]
-    subprocess.check_call(untar_command)
+    with tarfile.open(tar_filename, "r") as tar_o:
+        tar_o.extractall(path=directory)
 
 
 def main(syn, args):
