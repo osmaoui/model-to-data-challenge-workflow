@@ -48,7 +48,7 @@ requirements:
           result = {'primary_metric': 'auc',
                     'primary_metric_value': 0.8,
                     'secondary_metric': 'aupr',
-                    'secondary_metric_value: 0.2,
+                    'secondary_metric_value': 0.2,
                     'submission_status': prediction_file_status}
           with open(args.results, 'w') as o:
             o.write(json.dumps(result))
