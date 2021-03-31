@@ -2,11 +2,12 @@
 #
 # Workflow for SC1
 # Inputs:
-#   submissionId: ID of the Synapse submission to process
-#   adminUploadSynId: ID of a folder accessible only to the submission queue administrator
-#   submitterUploadSynId: ID of a folder accessible to the submitter
-#   workflowSynapseId:  ID of the Synapse entity containing a reference to the workflow file(s)
-#
+#   submissionId: Submission ID to run this workflow on
+#   adminUploadSynId: Synapse ID of Folder accessible by admin user/team
+#   submitterUploadSynId: Synapse ID of Folder accessible by submitter
+#   workflowSynapseId: Synapse ID of File that links to workflow archive
+#   synapseConfig: filepath to .synapseConfig file
+
 cwlVersion: v1.0
 class: Workflow
 
@@ -25,7 +26,7 @@ inputs:
   - id: synapseConfig
     type: File
 
-# there are no output at the workflow engine level.  Everything is uploaded to Synapse
+# No output; everything is uploaded to Synapse.
 outputs: []
 
 steps:
@@ -35,7 +36,7 @@ steps:
     in:
       - id: entityid
         source: "#submitterUploadSynId"
-      # Must update the principal id here
+      # TODO: replace `valueFrom` with the admin user ID or admin team ID
       - id: principalid
         valueFrom: "3379097"
       - id: permissions
@@ -49,7 +50,7 @@ steps:
     in:
       - id: entityid
         source: "#adminUploadSynId"
-      # Must update the principal id here
+      # TODO: replace `valueFrom` with the admin user ID or admin team ID
       - id: principalid
         valueFrom: "3379097"
       - id: permissions
@@ -85,8 +86,8 @@ steps:
   download_goldstandard:
     run: https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/dockstore-tool-synapseclient/v1.3/cwl/synapse-get-tool.cwl
     in:
+      # TODO: replace `valueFrom` with the Synapse ID to the challenge goldstandard
       - id: synapseid
-        # Replace value here
         valueFrom: "syn18081597"
       - id: synapse_config
         source: "#synapseConfig"
@@ -105,7 +106,7 @@ steps:
       - id: status
       - id: invalid_reasons
 
-  docker_validation_email:
+  email_docker_validation:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/validate_email.cwl
     in:
       - id: submissionid
@@ -116,6 +117,7 @@ steps:
         source: "#validate_docker/status"
       - id: invalid_reasons
         source: "#validate_docker/invalid_reasons"
+      # OPTIONAL: set `default` to `false` if email notification about valid submission is needed
       - id: errors_only
         default: true
     out: [finished]
@@ -143,7 +145,7 @@ steps:
       - id: previous_annotation_finished
         source: "#annotate_docker_validation_with_output/finished"
       - id: previous_email_finished
-        source: "#docker_validation_email/finished"
+        source: "#email_docker_validation/finished"
     out: [finished]
 
   run_docker:
@@ -165,8 +167,11 @@ steps:
         source: "#submitterUploadSynId"
       - id: synapse_config
         source: "#synapseConfig"
+      # OPTIONAL: set `default` to `false` if log file should not be uploaded to Synapse
+      - id: store
+        default: true
+      # TODO: replace `valueFrom` with the absolute path to the data directory to be mounted
       - id: input_dir
-        # TODO: update
         valueFrom: "/tmp"
       - id: docker_script
         default:
@@ -210,10 +215,10 @@ steps:
         source: "#annotate_docker_validation_with_output/finished"
     out: [finished]
 
-  validation:
+  validate:
     run: validate.cwl
     in:
-      - id: inputfile
+      - id: input_file
         source: "#run_docker/predictions"
       - id: entity_type
         source: "#get_docker_submission/entity_type"
@@ -222,7 +227,7 @@ steps:
       - id: status
       - id: invalid_reasons
   
-  validation_email:
+  email_validation:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/validate_email.cwl
     in:
       - id: submissionid
@@ -230,13 +235,13 @@ steps:
       - id: synapse_config
         source: "#synapseConfig"
       - id: status
-        source: "#validation/status"
+        source: "#validate/status"
       - id: invalid_reasons
-        source: "#validation/invalid_reasons"
+        source: "#validate/invalid_reasons"
+      # OPTIONAL: set `default` to `false` if email notification about valid submission is needed
       - id: errors_only
         default: true
     out: [finished]
-
 
   annotate_validation_with_output:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/annotate_submission.cwl
@@ -244,7 +249,7 @@ steps:
       - id: submissionid
         source: "#submissionId"
       - id: annotation_values
-        source: "#validation/results"
+        source: "#validate/results"
       - id: to_public
         default: true
       - id: force
@@ -259,17 +264,17 @@ steps:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/check_status.cwl
     in:
       - id: status
-        source: "#validation/status"
+        source: "#validate/status"
       - id: previous_annotation_finished
         source: "#annotate_validation_with_output/finished"
       - id: previous_email_finished
-        source: "#validation_email/finished"
+        source: "#email_validation/finished"
     out: [finished]
 
-  scoring:
+  score:
     run: score.cwl
     in:
-      - id: inputfile
+      - id: input_file
         source: "#run_docker/predictions"
       - id: goldstandard
         source: "#download_goldstandard/filepath"
@@ -278,7 +283,7 @@ steps:
     out:
       - id: results
       
-  score_email:
+  email_score:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/score_email.cwl
     in:
       - id: submissionid
@@ -286,7 +291,10 @@ steps:
       - id: synapse_config
         source: "#synapseConfig"
       - id: results
-        source: "#scoring/results"
+        source: "#score/results"
+      # OPTIONAL: add annotations to be withheld from participants to `[]`
+      # - id: private_annotations
+      #   default: []
     out: []
 
   annotate_submission_with_output:
@@ -295,7 +303,7 @@ steps:
       - id: submissionid
         source: "#submissionId"
       - id: annotation_values
-        source: "#scoring/results"
+        source: "#score/results"
       - id: to_public
         default: true
       - id: force
