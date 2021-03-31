@@ -12,7 +12,7 @@ For more information about the tools, refer to [ChallengeWorkflowTemplates](http
 `get_docker_submission` | Downloads the submission's Docker image.
 `get_docker_config` | Extracts the Synapse credentials and format into Docker config.
 `download_goldstandard` | Downloads the goldstandard file.
-`validate_docker` | Ensures the Docker submission image exists and >1 terabyte in size.
+`validate_docker` | Ensures the Docker submission image exists and <1 terabyte in size.
 `email_docker_validation` | Sends an email notification to the partipant/team of the validation results. By default, an email will only be sent if there are errors.
 `annotate_docker_validation_with_output` | Updates the submission status (`VALIDATED` if valid, else `INVALID`).
 `check_docker_status` | Checks the submission status. If the status is `INVALID`, halt the workflow.
