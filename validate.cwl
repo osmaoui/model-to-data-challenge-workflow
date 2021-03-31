@@ -8,23 +8,22 @@ baseCommand: python
 
 hints:
   DockerRequirement:
-    dockerPull: python:3.7
+    dockerPull: python:3.8.8-slim-buster
 
 inputs:
-
+  - id: input_file
+    type: File?
   - id: entity_type
     type: string
-  - id: inputfile
-    type: File?
 
 arguments:
   - valueFrom: validate.py
-  - valueFrom: $(inputs.inputfile)
+  - valueFrom: $(inputs.input_file)
     prefix: -s
-  - valueFrom: results.json
-    prefix: -r
   - valueFrom: $(inputs.entity_type)
     prefix: -e
+  - valueFrom: results.json
+    prefix: -r
 
 requirements:
   - class: InlineJavascriptRequirement
@@ -59,7 +58,6 @@ requirements:
               o.write(json.dumps(result))
      
 outputs:
-
   - id: results
     type: File
     outputBinding:
