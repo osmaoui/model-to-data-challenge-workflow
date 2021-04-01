@@ -8,10 +8,10 @@ baseCommand: python
 
 hints:
   DockerRequirement:
-    dockerPull: python:3.7
+    dockerPull: python:3.8.8-slim-buster
 
 inputs:
-  - id: inputfile
+  - id: input_file
     type: File
   - id: goldstandard
     type: File
@@ -20,7 +20,7 @@ inputs:
 
 arguments:
   - valueFrom: score.py
-  - valueFrom: $(inputs.inputfile.path)
+  - valueFrom: $(inputs.input_file.path)
     prefix: -f
   - valueFrom: $(inputs.goldstandard.path)
     prefix: -g

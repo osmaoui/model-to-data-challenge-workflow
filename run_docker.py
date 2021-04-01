@@ -21,13 +21,12 @@ def create_log_file(log_filename, log_text=None):
             log_file.write("No Logs")
 
 
-def store_log_file(syn, log_filename, parentid, test=False):
+def store_log_file(syn, log_filename, parentid, store=True):
     """Store log file"""
     statinfo = os.stat(log_filename)
     if statinfo.st_size > 0 and statinfo.st_size/1000.0 <= 50:
         ent = synapseclient.File(log_filename, parent=parentid)
-        # Don't store if test
-        if not test:
+        if not store:
             try:
                 syn.store(ent)
             except synapseclient.exceptions.SynapseHTTPError as err:
@@ -157,12 +156,12 @@ def main(syn, args):
         while container in client.containers.list():
             log_text = container.logs()
             create_log_file(log_filename, log_text=log_text)
-            store_log_file(syn, log_filename, args.parentid)
+            store_log_file(syn, log_filename, args.parentid, store=args.store)
             time.sleep(60)
         # Must run again to make sure all the logs are captured
         log_text = container.logs()
         create_log_file(log_filename, log_text=log_text)
-        store_log_file(syn, log_filename, args.parentid)
+        store_log_file(syn, log_filename, args.parentid, store=args.store)
         # Remove container and image after being done
         container.remove()
 
@@ -170,7 +169,7 @@ def main(syn, args):
 
     if statinfo.st_size == 0:
         create_log_file(log_filename, log_text=errors)
-        store_log_file(syn, log_filename, args.parentid)
+        store_log_file(syn, log_filename, args.parentid, store=args.store)
 
     print("finished training")
     # Try to remove the image
@@ -200,6 +199,8 @@ if __name__ == '__main__':
                         help="Input Directory")
     parser.add_argument("-c", "--synapse_config", required=True,
                         help="credentials file")
+    parser.add_argument("--store", action='store_true',
+                        help="to store logs")
     parser.add_argument("--parentid", required=True,
                         help="Parent Id of submitter directory")
     parser.add_argument("--status", required=True, help="Docker image status")
