@@ -26,7 +26,7 @@ def store_log_file(syn, log_filename, parentid, store=True):
     statinfo = os.stat(log_filename)
     if statinfo.st_size > 0 and statinfo.st_size/1000.0 <= 50:
         ent = synapseclient.File(log_filename, parent=parentid)
-        if not store:
+        if store:
             try:
                 syn.store(ent)
             except synapseclient.exceptions.SynapseHTTPError as err:
