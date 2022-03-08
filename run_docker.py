@@ -122,7 +122,7 @@ def main(syn, args):
     print("checking for containers")
     container = None
     errors = None
-    for cont in client.containers.list(all=True):
+    for cont in client.containers.list(all=True, ignore_removed=True):
         if args.submissionid in cont.name:
             # Must remove container if the container wasn't killed properly
             if cont.status == "exited":
@@ -153,7 +153,7 @@ def main(syn, args):
     # no container to remove
     if container is not None:
         # Check if container is still running
-        while container in client.containers.list():
+        while container in client.containers.list(ignore_removed=True):
             log_text = container.logs()
             create_log_file(log_filename, log_text=log_text)
             store_log_file(syn, log_filename, args.parentid, store=args.store)
