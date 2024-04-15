@@ -39,7 +39,7 @@ steps:
         source: "#submitterUploadSynId"
       # TODO: replace `valueFrom` with the admin user ID or admin team ID
       - id: principalid
-        valueFrom: "3379097"
+        valueFrom: "57340750"
       - id: permissions
         valueFrom: "download"
       - id: synapse_config
@@ -53,7 +53,7 @@ steps:
         source: "#adminUploadSynId"
       # TODO: replace `valueFrom` with the admin user ID or admin team ID
       - id: principalid
-        valueFrom: "3379097"
+        valueFrom: "57340750"
       - id: permissions
         valueFrom: "download"
       - id: synapse_config
@@ -89,7 +89,7 @@ steps:
     in:
       # TODO: replace `valueFrom` with the Synapse ID to the challenge goldstandard
       - id: synapseid
-        valueFrom: "syn18081597"
+        valueFrom: "57340750"
       - id: synapse_config
         source: "#synapseConfig"
     out:
