@@ -2,11 +2,11 @@
 
 cwlVersion: v1.0
 class: Workflow
-label: <YOUR CHALLENGE> Evaluation
+label: FINRISK - Heart Failure and Microbiome (9615015) Evaluation
 doc: >
   BRIEF DESCRIPTION ABOUT THE CHALLENGE, e.g.
-  This workflow will run and evaluate Docker submissions to the
-  Awesome Challenge (syn123). Metrics returned are x, y, z.
+  This workflow will run and evaluate singularity submissions to the
+  FINRISK - Heart Failure and Microbiome (syn27130803). Metrics returned are harrell_c,hoslem_test.
 
 requirements:
   - class: StepInputExpressionRequirement
@@ -27,11 +27,15 @@ inputs:
   workflowSynapseId:
     label: Synapse File ID that links to the workflow
     type: string
+  workingDir:
+    label: file to working directory that contain the input file
+    type: string
 
 outputs: {}
 
 steps:
 
+##?can we skip this step because it already authenticate, or can we add something like syn #= synapseclient.login()
   set_submitter_folder_permissions:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/set_permissions.cwl
     in:
@@ -39,13 +43,14 @@ steps:
         source: "#submitterUploadSynId"
       # TODO: replace `valueFrom` with the admin user ID or admin team ID
       - id: principalid
-        valueFrom: "3500740"
+        valueFrom: "3379097"
       - id: permissions
         valueFrom: "download"
       - id: synapse_config
         source: "#synapseConfig"
     out: []
 
+##?can we skip this step?
   set_admin_folder_permissions:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/set_permissions.cwl
     in:
@@ -53,15 +58,16 @@ steps:
         source: "#adminUploadSynId"
       # TODO: replace `valueFrom` with the admin user ID or admin team ID
       - id: principalid
-        valueFrom: "3500740"
+        valueFrom: "3379097"
       - id: permissions
         valueFrom: "download"
       - id: synapse_config
         source: "#synapseConfig"
     out: []
 
-  get_docker_submission:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/get_submission.cwl
+##?modify
+  get_singularity_submission:
+    run: get_submission.cwl
     in:
       - id: submissionid
         source: "#submissionId"
@@ -69,45 +75,12 @@ steps:
         source: "#synapseConfig"
     out:
       - id: filepath
-      - id: docker_repository
-      - id: docker_digest
       - id: entity_id
       - id: entity_type
       - id: results
 
-  get_docker_config:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/get_docker_config.cwl
-    in:
-      - id: synapse_config
-        source: "#synapseConfig"
-    out: 
-      - id: docker_registry
-      - id: docker_authentication
-
-  download_goldstandard:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks-Workflows/cwl-tool-synapseclient/v1.4/cwl/synapse-get-tool.cwl
-    in:
-      # TODO: replace `valueFrom` with the Synapse ID to the challenge goldstandard
-      - id: synapseid
-        valueFrom: "57382196"
-      - id: synapse_config
-        source: "#synapseConfig"
-    out:
-      - id: filepath
-
-  validate_docker:
-    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/validate_docker.cwl
-    in:
-      - id: submissionid
-        source: "#submissionId"
-      - id: synapse_config
-        source: "#synapseConfig"
-    out:
-      - id: results
-      - id: status
-      - id: invalid_reasons
-
-  email_docker_validation:
+##?modify?, invalid if the suffix other than .sif or zip. Or maybe can skip this part
+  email_validation:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/validate_email.cwl
     in:
       - id: submissionid
@@ -123,7 +96,8 @@ steps:
         default: true
     out: [finished]
 
-  annotate_docker_validation_with_output:
+  ##?skip unecessary in this framework
+  annotate_validation_with_output:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/annotate_submission.cwl
     in:
       - id: submissionid
@@ -138,6 +112,7 @@ steps:
         source: "#synapseConfig"
     out: [finished]
 
+  ##?skip unnecessary
   check_docker_status:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/check_status.cwl
     in:
@@ -148,6 +123,9 @@ steps:
       - id: previous_email_finished
         source: "#email_docker_validation/finished"
     out: [finished]
+
+  ##?any idea
+  run_singularity_submission:
 
   run_docker:
     run: steps/run_docker.cwl
@@ -181,6 +159,7 @@ steps:
     out:
       - id: predictions
 
+##?not sure if I need this, but if I gonna upload score.csv and stats.csv somewhere?
   upload_results:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/upload_to_synapse.cwl
     in:
@@ -198,8 +177,8 @@ steps:
       - id: uploaded_fileid
       - id: uploaded_file_version
       - id: results
-
-  annotate_docker_upload_results:
+##?move this step after score
+  annotate_upload_results:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/annotate_submission.cwl
     in:
       - id: submissionid
@@ -227,7 +206,7 @@ steps:
       - id: results
       - id: status
       - id: invalid_reasons
-  
+
   email_validation:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/validate_email.cwl
     in:
@@ -279,11 +258,11 @@ steps:
         source: "#run_docker/predictions"
       - id: goldstandard
         source: "#download_goldstandard/filepath"
-      - id: check_validation_finished 
+      - id: check_validation_finished
         source: "#check_status/finished"
     out:
       - id: results
-      
+
   email_score:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/score_email.cwl
     in:
@@ -314,4 +293,3 @@ steps:
       - id: previous_annotation_finished
         source: "#annotate_validation_with_output/finished"
     out: [finished]
- 
