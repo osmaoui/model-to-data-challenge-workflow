@@ -4,7 +4,7 @@ cwlVersion: v1.0
 class: Workflow
 label: MICCAI 2024 3DTeethLand Challenge Evaluation Test
 doc: >
-    thus is a test
+    this is a test
 
 requirements:
   - class: StepInputExpressionRequirement
@@ -46,7 +46,7 @@ steps:
         source: "#synapseConfig"
     out: []
 
-   download_submission:
+  download_submission:
     doc: Download submission
     run: |-
       https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v4.1/cwl/get_submission.cwl
