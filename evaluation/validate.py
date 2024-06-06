@@ -113,7 +113,7 @@ def main():
     args = get_args()
     entity_type = args.entity_type.split(".")[-1]
 
-    if entity_type != "FileEntity":
+    if entity_type != "DockerRepository":
         invalid_reasons = [f"Submission must be a File, not {entity_type}."]
     else:
         invalid_reasons = validate(
