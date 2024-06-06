@@ -1,4 +1,6 @@
 import json
+import csv
+
 if __name__ == "__main__":
 
     # The mounted directories in the docker container
@@ -57,7 +59,7 @@ if __name__ == "__main__":
     ]
 
     # Writing to csv file
-    with open(output_directory + '/pred.csv', mode='w', newline='') as file:
+    with open(output_directory + '/predictions.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerows(data)
 
