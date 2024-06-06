@@ -299,7 +299,7 @@ steps:
     run: steps/score.cwl
     in:
       - id: input_file
-        source: "#download_submission/filepath"
+        source: "#run_docker/predictions"
       - id: goldstandard
         source: "#download_goldstandard/filepath"
       - id: check_validation_finished
