@@ -236,10 +236,13 @@ steps:
     out: [finished]
 
   validate:
+    doc: Validate predictions file
     run: steps/validate.cwl
     in:
       - id: input_file
         source: "#run_docker/predictions"
+      - id: goldstandard
+        source: "#download_goldstandard/filepath"
       - id: entity_type
         source: "#get_docker_submission/entity_type"
     out:
@@ -292,10 +295,11 @@ steps:
     out: [finished]
 
   score:
+    doc: Score generated predictions file
     run: steps/score.cwl
     in:
       - id: input_file
-        source: "#run_docker/predictions"
+        source: "#download_submission/filepath"
       - id: goldstandard
         source: "#download_goldstandard/filepath"
       - id: check_validation_finished
