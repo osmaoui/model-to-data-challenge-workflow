@@ -124,8 +124,9 @@ def main(syn, args):
     docker_image = args.docker_repository + "@" + args.docker_digest
 
     # These are the volumes that you want to mount onto your docker container
-    #output_dir = os.path.join(os.getcwd(), "output")
-    output_dir = os.getcwd()
+    output_dir = os.path.join(os.getcwd(), "output")
+    # output_dir = os.getcwd()
+    os.makedirs(output_dir, exist_ok=True, mode=777)
     input_dir = args.input_dir
 
     print("mounting volumes")
@@ -203,7 +204,7 @@ def main(syn, args):
     if not output_folder:
         raise Exception("No 'predictions.csv' file written to /output, "
                         "please check inference docker")
-    elif "predictions.csv" not in output_folder:
+    elif "predictions.json" not in output_folder:
         raise Exception("No 'predictions.csv' file written to /output, "
                         "please check inference docker")
     # CWL has a limit of the array of files it can accept in a folder
