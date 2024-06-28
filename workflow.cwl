@@ -192,7 +192,7 @@ steps:
         default: true
       # TODO: replace `valueFrom` with the absolute path to the data directory to be mounted
       - id: input_dir
-        valueFrom: "/tmp"
+        valueFrom: "/tmp/data"
       - id: docker_script
         default:
           class: File
