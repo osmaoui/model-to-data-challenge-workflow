@@ -36,8 +36,6 @@ baseCommand: /usr/local/bin/validate.py
 arguments:
 - prefix: -p
   valueFrom: $(inputs.input_file)
-- prefix: -g
-  valueFrom: $(inputs.goldstandard.path)
 - prefix: -e
   valueFrom: $(inputs.entity_type)
 - prefix: -o
@@ -49,11 +47,10 @@ hints:
 
 s:author:
 - class: s:Person
-  s:identifier: https://orcid.org/0000-0002-5622-7998
-  s:email: verena.chung@sagebase.org
-  s:name: Verena Chung
+  s:email: oussama.smaoui@synapse.org
+  s:name: Oussama SMAOUI
 
-s:codeRepository: https://github.com/Sage-Bionetworks-Challenges/olfactory-mixtures-prediction
+s:codeRepository: https://github.com/osmaoui/model-to-data-challenge-workflow/tree/main
 s:license: https://spdx.org/licenses/Apache-2.0
 
 $namespaces:
