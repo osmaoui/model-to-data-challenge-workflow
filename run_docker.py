@@ -205,7 +205,7 @@ def main(syn, args):
     if not output_folder:
         raise Exception("No 'predictions.csv' file written to /output, output directory is empty"
                         "please check inference docker")
-    elif "predictions.json" not in output_folder:
+    elif "predictions.csv" not in output_folder:
         raise Exception("No 'predictions.csv' file written to /output, "
                         "please check inference docker")
     # CWL has a limit of the array of files it can accept in a folder
