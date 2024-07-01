@@ -62,4 +62,4 @@ outputs:
   predictions:
     type: File
     outputBinding:
-      glob: predictions.json
+      glob: predictions.csv
